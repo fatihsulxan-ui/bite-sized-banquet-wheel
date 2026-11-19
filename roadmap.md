@@ -1,4 +1,5 @@
 # Yönetim paneli
+- [x] Uygulamanın tüm yazılarını İngilizceye çevirme ve menü gizleme alanı dahil kontrol etme
 - [x] Kalıcı menü ve kategori yönetimi
 - [x] E-posta, hesap veya şifre gerektirmeyen yönetim paneli
 - [x] Menü QR kodu ve indirme

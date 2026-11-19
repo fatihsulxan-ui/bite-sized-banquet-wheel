@@ -82,7 +82,7 @@ function Dashboard() {
     finally { await client.invalidateQueries({ queryKey: ["comments"] }); }
   }
   async function removeOne(id: string) {
-    try { await removeComment({ data: { id } }); await client.invalidateQueries({ queryKey: ["comments"] }); toast.success("Yorum silindi."); } catch { toast.error("Yorum silinemedi."); }
+    try { await removeComment({ data: { id } }); await client.invalidateQueries({ queryKey: ["comments"] }); toast.success("Comment deleted."); } catch { toast.error("Comment could not be deleted."); }
   }
   function downloadQr() {
     const svg = qr.current?.querySelector("svg"); if (!svg) return;
@@ -92,12 +92,12 @@ function Dashboard() {
     exported.style.setProperty("--qr-background", colors.getPropertyValue("--qr-background"));
     exported.style.setProperty("--qr-foreground", colors.getPropertyValue("--qr-foreground"));
     const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(exported)], { type: "image/svg+xml" }));
-    const link = document.createElement("a"); link.href = url; link.download = "kahve-menu-qr.svg"; link.click(); URL.revokeObjectURL(url);
+    const link = document.createElement("a"); link.href = url; link.download = "coffee-menu-qr.svg"; link.click(); URL.revokeObjectURL(url);
   }
 
   const categoryName = (id: string) => data.categories.find((c) => c.id === id)?.name ?? "";
   const hiddenCount = data.items.filter((i) => !i.available).length;
-  const products = data.items.filter((i) => (filter === "hidden" ? !i.available : !filter || i.category_id === filter) && i.name.toLocaleLowerCase("tr").includes(search.toLocaleLowerCase("tr")));
+  const products = data.items.filter((i) => (filter === "hidden" ? !i.available : !filter || i.category_id === filter) && i.name.toLocaleLowerCase("en").includes(search.toLocaleLowerCase("en")));
   const tabs: { id: Tab; label: string; icon: typeof Coffee; count?: number | undefined }[] = [
     { id: "items", label: "Products", icon: UtensilsCrossed, count: data.items.length },
     { id: "categories", label: "Categories", icon: LayoutGrid, count: data.categories.length },
@@ -138,7 +138,7 @@ function Dashboard() {
             className={`shrink-0 rounded-full border px-4 py-1.5 text-sm transition-colors ${filter === c.id ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>{c.name}</button>)}
           {hiddenCount > 0 && <button type="button" onClick={() => setFilter("hidden")}
             className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm transition-colors ${filter === "hidden" ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>
-            <EyeOff className="size-3.5" />Gizli<span className="rounded-full bg-secondary px-1.5 text-xs">{hiddenCount}</span>
+            <EyeOff className="size-3.5" />Hidden<span className="rounded-full bg-secondary px-1.5 text-xs">{hiddenCount}</span>
           </button>}
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -174,7 +174,7 @@ function Dashboard() {
             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-sm font-semibold text-primary">{c.position}</span>
             <div className="min-w-0 flex-1"><h2 className="break-words font-medium">{c.name}</h2><p className="text-xs text-muted-foreground">{data.items.filter((i) => i.category_id === c.id).length} products</p></div>
             <Button size="sm" variant="secondary" aria-label={`${c.name} edit`} onClick={() => setCategory(c)}><Pencil />Edit</Button>
-            <Button size="icon" variant="ghost" title="Kategoriyi sil" aria-label={`${c.name} delete`} className="text-destructive hover:text-destructive" onClick={() => setDeleting({ id: c.id, kind: "category", name: c.name })}><Trash2 /></Button>
+            <Button size="icon" variant="ghost" title="Delete category" aria-label={`${c.name} delete`} className="text-destructive hover:text-destructive" onClick={() => setDeleting({ id: c.id, kind: "category", name: c.name })}><Trash2 /></Button>
           </article>)}
           {!data.categories.length && <p className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">No categories yet.</p>}
         </div>
@@ -190,7 +190,7 @@ function Dashboard() {
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               {!c.is_read && <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">New</span>}
               <h2 className="font-medium">{c.author_name || "Anonymous guest"}</h2>
-              <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}</span>
+              <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</span>
             </div>
             <p className="mt-2 whitespace-pre-wrap break-words text-sm">{c.message}</p>
             <div className="mt-3 flex gap-2 border-t border-border pt-3">
@@ -219,7 +219,7 @@ function Dashboard() {
           <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
             {menuUrl ? <div><p className="mb-2 text-xs font-medium text-muted-foreground">MENU LINK</p><p className="break-all rounded-xl bg-secondary p-3 text-sm">{menuUrl}</p></div> : <p role="status" className="text-sm text-muted-foreground">The site must be published for the QR code.</p>}
             <div className="grid gap-2 sm:grid-cols-2">
-              <Button size="lg" className="rounded-xl" disabled={!menuUrl} onClick={downloadQr}><Download />QR kodu indir</Button>
+              <Button size="lg" className="rounded-xl" disabled={!menuUrl} onClick={downloadQr}><Download />Download QR code</Button>
               <Button size="lg" className="rounded-xl" disabled={!menuUrl} variant="outline" onClick={async () => { if (!menuUrl) return; try { await navigator.clipboard.writeText(menuUrl); toast.success("Link copied."); } catch { toast.error("Could not copy the link."); } }}><Copy />Copy link</Button>
             </div>
           </div>

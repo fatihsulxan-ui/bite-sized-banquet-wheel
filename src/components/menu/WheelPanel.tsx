@@ -30,7 +30,7 @@ function ClaimVerifier({ claims }: { claims: { code: string; prize: string; crea
   async function lookup(value = code) {
     if (!value.trim()) return;
     setBusy(true);
-    try { setResult(await check({ data: { code: value } })); } catch { toast.error("Kod kontrol edilemedi."); } finally { setBusy(false); }
+    try { setResult(await check({ data: { code: value } })); } catch { toast.error("Code could not be checked."); } finally { setBusy(false); }
   }
   async function markUsed() {
     if (!result?.found) return;
@@ -47,7 +47,7 @@ function ClaimVerifier({ claims }: { claims: { code: string; prize: string; crea
     <h2 className="text-lg font-semibold">Verify prize</h2>
     <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); void lookup(); }}>
       <input aria-label="Prize code" className={`${base} min-w-0 flex-1 font-mono uppercase tracking-widest`} maxLength={12} placeholder="ABC234" value={code} onChange={(e) => { setCode(e.target.value); setResult(null); }} />
-      <Button type="submit" variant="secondary" disabled={busy || !code.trim()}><Search />Kontrol et</Button>
+      <Button type="submit" variant="secondary" disabled={busy || !code.trim()}><Search />Check</Button>
     </form>
     {result && (result.found ? <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary p-3">
       <div><p className="font-semibold">{result.prize}</p>
@@ -122,8 +122,8 @@ export function WheelPanel() {
               className={`rounded-xl px-2 py-2 text-xs font-medium transition-colors sm:text-sm ${mode === m.id ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>{m.label}</button>)}
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-            {mode === "l" ? <div className="flex items-center gap-2">En fazla
-              <Button size="icon" variant="secondary" className="size-8 rounded-full" aria-label="Azalt" onClick={() => setPrize(i, { limit: Math.max(1, (p.limit ?? 1) - 1) })}><Minus /></Button>
+            {mode === "l" ? <div className="flex items-center gap-2">At most
+              <Button size="icon" variant="secondary" className="size-8 rounded-full" aria-label="Decrease" onClick={() => setPrize(i, { limit: Math.max(1, (p.limit ?? 1) - 1) })}><Minus /></Button>
               <span className="w-6 text-center font-semibold text-foreground">{p.limit}</span>
               <Button size="icon" variant="secondary" className="size-8 rounded-full" aria-label="Increase" onClick={() => setPrize(i, { limit: Math.min(999, (p.limit ?? 1) + 1) })}><Plus /></Button>
               people can win today</div> : <span>{modes.find((m) => m.id === mode)?.hint}</span>}

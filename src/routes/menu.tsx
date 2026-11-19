@@ -48,9 +48,9 @@ function Menu() {
   const openItem = ITEMS.find((i) => i.id === openId);
 
   const visible = useMemo(() => {
-    const q = query.trim().toLocaleLowerCase("tr");
+    const q = query.trim().toLocaleLowerCase("en");
     let list = q
-      ? ITEMS.filter((i) => (i.name + " " + i.desc).toLocaleLowerCase("tr").includes(q))
+      ? ITEMS.filter((i) => (i.name + " " + i.desc).toLocaleLowerCase("en").includes(q))
       : category === "all" ? ITEMS : ITEMS.filter((i) => i.category === category);
     if (sort === "asc") list = [...list].sort((a, b) => a.price - b.price);
     if (sort === "desc") list = [...list].sort((a, b) => b.price - a.price);
