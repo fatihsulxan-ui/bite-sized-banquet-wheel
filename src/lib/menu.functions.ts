@@ -90,7 +90,7 @@ export const markComment = createServerFn({ method: "POST" }).middleware([manage
 });
 export const deleteComment = createServerFn({ method: "POST" }).middleware([managementDb]).inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input)).handler(async ({ data, context }) => {
   const result = await context.db.from("guest_comments").delete().eq("id", data.id).select("id").single();
-  if (result.error) throw new Error("Yorum silinemedi.");
+  if (result.error) throw new Error("Comment could not be deleted.");
   return { ok: true };
 });
 
