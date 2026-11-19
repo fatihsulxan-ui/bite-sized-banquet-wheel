@@ -84,15 +84,33 @@ function Dashboard() {
   async function removeOne(id: string) {
     try { await removeComment({ data: { id } }); await client.invalidateQueries({ queryKey: ["comments"] }); toast.success("Comment deleted."); } catch { toast.error("Comment could not be deleted."); }
   }
-  function downloadQr() {
+  async function downloadQr() {
     const svg = qr.current?.querySelector("svg"); if (!svg) return;
     const exported = svg.cloneNode(true);
     if (!(exported instanceof SVGElement)) return;
-    const colors = getComputedStyle(document.documentElement);
-    exported.style.setProperty("--qr-background", colors.getPropertyValue("--qr-background"));
-    exported.style.setProperty("--qr-foreground", colors.getPropertyValue("--qr-foreground"));
+    const sourceShapes = svg.querySelectorAll("[fill]");
+    exported.querySelectorAll("[fill]").forEach((shape, index) => {
+      const source = sourceShapes[index];
+      if (source) shape.setAttribute("fill", getComputedStyle(source).fill);
+    });
+    exported.setAttribute("width", "960");
+    exported.setAttribute("height", "960");
     const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(exported)], { type: "image/svg+xml" }));
-    const link = document.createElement("a"); link.href = url; link.download = "coffee-menu-qr.svg"; link.click(); URL.revokeObjectURL(url);
+    try {
+      const image = new Image(); image.src = url;
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = 1200; canvas.height = 1200;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Image export unavailable.");
+      context.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--qr-background").trim();
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, (canvas.width - image.width) / 2, (canvas.height - image.height) / 2);
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png"); link.download = "coffee-menu-qr.png";
+      document.body.appendChild(link); link.click(); link.remove();
+    } catch { toast.error("QR image could not be downloaded. Please try again."); }
+    finally { URL.revokeObjectURL(url); }
   }
 
   const categoryName = (id: string) => data.categories.find((c) => c.id === id)?.name ?? "";
